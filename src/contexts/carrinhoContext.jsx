@@ -36,7 +36,12 @@ function getBookStock(book) {
   return Number.isInteger(stock) && stock >= 0 ? stock : null;
 }
 
-function createUnavailableItem(bookId, quantity, item = null, reason = "missing") {
+function createUnavailableItem(
+  bookId,
+  quantity,
+  item = null,
+  reason = "missing"
+) {
   return { book_id: bookId, quantity, item, reason };
 }
 
@@ -150,7 +155,11 @@ export function CarrinhoProvider({
       setUnavailableItems((currentItems) =>
         currentItems.map((currentItem) =>
           currentItem.book_id === bookId
-            ? { ...currentItem, quantity: currentItem.quantity + 1, item: livro }
+            ? {
+                ...currentItem,
+                quantity: currentItem.quantity + 1,
+                item: livro,
+              }
             : currentItem
         )
       );

@@ -1,47 +1,40 @@
-import { Banner } from "../../components/banner/Banner.jsx";
-import { CardProduto } from "../../components/cardProduto/CardProduto.jsx";
-import { Editoras } from "../../components/Section/Editora/Editoras.jsx";
-import { Novidades } from "../../components/Section/Novidades/Novidades.jsx";
-import { Vantagens } from "../../components/Section/Vantagens/Vantagens.jsx";
-import { Categoria } from "../../components/categorias/Categorias.jsx";
-import { Loading } from "../../components/Loading/Loading.jsx";
+import { Banner } from "@/components/banner/Banner.jsx";
+import { CardProduto } from "@/components/cardProduto/CardProduto.jsx";
+import { Novidades } from "@/components/Section/Novidades/Novidades.jsx";
+import { Loading } from "@/components/Loading/Loading.jsx";
 
-export const Home = (props) => {
-  const { book, catalogoCarregando, catalogoErro } = props;
-
+export const Home = ({ book, catalogoCarregando, catalogoErro }) => {
   if (catalogoCarregando) {
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
+    return <Loading />;
   }
 
   if (catalogoErro) {
     return (
-      <div style={{ textAlign: "center", padding: "64px 20px" }}>
-        <h2>Não foi possível carregar o catálogo.</h2>
-        <p>Verifique sua conexão e tente novamente.</p>
+      <div className="mx-auto max-w-xl px-6 py-24 text-center">
+        <h2 className="text-2xl font-black">
+          Não foi possível carregar o catálogo.
+        </h2>
+
+        <p className="mt-2 text-slate-500">
+          Verifique sua conexão e tente novamente.
+        </p>
       </div>
     );
   }
 
   if (!book.length) {
     return (
-      <div style={{ textAlign: "center", padding: "64px 20px" }}>
-        <h2>O catálogo está vazio.</h2>
+      <div className="px-6 py-24 text-center">
+        <h2 className="text-2xl font-black">O catálogo está vazio.</h2>
       </div>
     );
   }
 
   return (
-    <div>
+    <>
       <Banner />
-      <Vantagens />
       <CardProduto book={book} />
-      <Categoria />
-      <Editoras />
       <Novidades />
-    </div>
+    </>
   );
 };

@@ -1,14 +1,12 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { ItemCarrinho } from "../../components/itemCarinho/ItemCarrinho";
-import { carrinhoContext } from "../../contexts/carrinhoContext";
-import { loginContext } from "../../contexts/loginContext";
-import { createOrder } from "../../services/ordersApi";
-import { Loading } from "../../components/Loading/Loading";
+import { ItemCarrinho } from "@/components/itemCarinho/ItemCarrinho";
+import { carrinhoContext } from "@/contexts/carrinhoContext";
+import { loginContext } from "@/contexts/loginContext";
+import { createOrder } from "@/services/ordersApi";
+import { Loading } from "@/components/Loading/Loading";
 import { toast } from "react-toastify";
-
-import styles from "./Carrinho.module.css";
 
 export function Carrinho() {
   const {
@@ -120,7 +118,7 @@ export function Carrinho() {
 
   if (!carrinho.length && !unavailableItems.length) {
     return (
-      <div className={styles.carrinhoContainer}>
+      <div className="mx-auto my-12 max-w-4xl rounded-3xl bg-white p-6 shadow-soft sm:p-12">
         <h1>Meu carrinho</h1>
 
         <h2
@@ -132,8 +130,7 @@ export function Carrinho() {
         <div className={styles.botoes}>
           <Link
             to="/"
-            className={styles.btnContinuar}
-            style={{ margin: "0 auto" }}
+            className="primary-button mx-auto block max-w-md text-center"
           >
             Voltar para página inicial
           </Link>
@@ -143,7 +140,7 @@ export function Carrinho() {
   }
 
   return (
-    <div className={styles.carrinhoContainer}>
+    <div className="mx-auto my-12 max-w-4xl rounded-3xl bg-white p-6 shadow-soft sm:p-12">
       <h1>Meu carrinho</h1>
 
       {unavailableItems.length > 0 && (
@@ -173,17 +170,21 @@ export function Carrinho() {
       })}
 
       {carrinho.length > 0 && (
-        <p className={styles.total}>Total: {totalDoCarrinho()}</p>
+        <p className="mt-6 text-right text-2xl font-black">
+          Total: {totalDoCarrinho()}
+        </p>
       )}
 
-      <div className={styles.botoes}>
-        <Link className={styles.btnContinuar} to="/">
+      <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-between">
+        <Link className="primary-button text-center" to="/">
           Continuar comprando
         </Link>
         <button
-          className={styles.btnComprar}
+          className="primary-button"
           onClick={checkout}
-          disabled={checkingOut || authLoading || cartLoading || !carrinho.length}
+          disabled={
+            checkingOut || authLoading || cartLoading || !carrinho.length
+          }
         >
           {checkingOut ? "Processando..." : "Concluir compra"}
         </button>

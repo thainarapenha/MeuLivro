@@ -1,22 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import "./global.css";
+import "@/global.css";
+import "react-toastify/dist/ReactToastify.css";
 
-import { Home } from "./pages/Home/Home.jsx";
-import { Cadastro } from "./pages/cadastro/Cadastro";
-import { Login } from "./pages/Login/Login";
-import { Header } from "./components/Header/index";
-import { Footer } from "./components/footer/footer";
-import { LoginProvider } from "./contexts/loginContext";
-import { Carrinho } from "./pages/carrinho/Carrinho";
-import { CarrinhoProvider } from "./contexts/carrinhoContext";
-
+import { Home } from "@/pages/Home/Home.jsx";
+import { Cadastro } from "@/pages/cadastro/Cadastro";
+import { Login } from "@/pages/Login/Login";
+import { LoginProvider } from "@/contexts/loginContext";
+import { Carrinho } from "@/pages/carrinho/Carrinho";
+import { CarrinhoProvider } from "@/contexts/carrinhoContext";
 import { ToastContainer } from "react-toastify";
-import { DetalhesProduto } from "./pages/detalhesProduto/DetalhesProduto";
-import { Pesquisa } from "./pages/pesquisa/Pesquisa";
-import { listarLivros } from "./services/livrosApi";
+import { DetalhesProduto } from "@/pages/detalhesProduto/DetalhesProduto";
+import { Pesquisa } from "@/pages/pesquisa/Pesquisa";
+import { listarLivros } from "@/services/livrosApi";
 
 export function App() {
   const [book, setBook] = useState([]);
@@ -40,41 +37,44 @@ export function App() {
   }, []);
 
   return (
-    <div>
-      <BrowserRouter>
-        <LoginProvider>
-          <CarrinhoProvider
-            book={book}
-            catalogLoading={catalogoCarregando}
-            catalogError={catalogoErro}
-          >
-            <Header book={book} setPesquisado={setPesquisado} />
+    <BrowserRouter>
+      <LoginProvider>
+        <CarrinhoProvider
+          book={book}
+          catalogLoading={catalogoCarregando}
+          catalogError={catalogoErro}
+        >
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Home
+                  book={book}
+                  catalogoCarregando={catalogoCarregando}
+                  catalogoErro={catalogoErro}
+                />
+              }
+            />
+            <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/carrinho" element={<Carrinho />} />
+            <Route path="/detalhes/:id" element={<DetalhesProduto />} />
+            <Route
+              path="/pesquisa"
+              element={<Pesquisa pesquisado={pesquisado} />}
+            />
+          </Routes>
+        </CarrinhoProvider>
 
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <Home
-                    book={book}
-                    catalogoCarregando={catalogoCarregando}
-                    catalogoErro={catalogoErro}
-                  />
-                }
-              />
-              <Route path="/cadastro" element={<Cadastro />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/carrinho" element={<Carrinho />} />
-              <Route path="/detalhes/:id" element={<DetalhesProduto />} />
-              <Route
-                path="/pesquisa"
-                element={<Pesquisa pesquisado={pesquisado} />}
-              />
-            </Routes>
-            <Footer />
-            <ToastContainer />
-          </CarrinhoProvider>
-        </LoginProvider>
-      </BrowserRouter>
-    </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          theme="light"
+          closeOnClick
+          pauseOnHover
+          draggable
+        />
+      </LoginProvider>
+    </BrowserRouter>
   );
 }

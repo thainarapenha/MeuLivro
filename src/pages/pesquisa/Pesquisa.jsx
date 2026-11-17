@@ -1,8 +1,6 @@
-import { useRef, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import styles from "../../components/cardProduto/CardProduto.module.css";
-import { carrinhoContext } from "../../contexts/carrinhoContext";
-import "./pesquisa.css";
+import { carrinhoContext } from "@/contexts/carrinhoContext";
 
 export function Pesquisa(props) {
   const { adicionaNoCarrinho } = useContext(carrinhoContext);
@@ -15,8 +13,6 @@ export function Pesquisa(props) {
     }
     return <></>;
   }
-
-  const carousel = useRef(null);
 
   useEffect(() => {
     window.scrollTo({
@@ -31,29 +27,41 @@ export function Pesquisa(props) {
   if (!state) return null;
 
   return (
-    <div className="wrapperPesquisa">
+    <div className="mx-auto my-12 min-h-[45vh] max-w-6xl px-6">
       <MostrarMensagem className="mostrarMensagem" />
 
-      <div className="cards">
+      <div className="mt-8 flex flex-wrap gap-5">
         {state.length > 0 ? (
           <>
             {state?.map((item, index) => {
               return (
-                <div className={styles.items} key={index}>
+                <div
+                  className="flex w-[220px] flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  key={index}
+                >
                   <Link to={`/detalhes/${item.id_livro}`}>
-                    <div className={styles.imgProduto}>
-                      <img src={item?.url_img} target="_blank" />
+                    <div className="flex h-64 items-center justify-center rounded-xl bg-slate-50 p-4">
+                      <img
+                        className="max-h-full max-w-full object-contain"
+                        src={item?.url_img}
+                        alt={item?.titulo}
+                      />
                     </div>
 
-                    <div className={styles.infoProduto}>
+                    <div className="flex flex-1 flex-col justify-between gap-3 py-4">
                       <strong>
-                        <p id="titulo">{item?.titulo}</p>
+                        <p className="font-bold">{item?.titulo}</p>
                       </strong>
-                      <p id="preco">R$ {item?.preco}</p>
+                      <p className="font-black text-amber-600">
+                        R$ {item?.preco}
+                      </p>
                     </div>
                   </Link>
-                  <div className={styles.btnComprar}>
-                    <button onClick={() => adicionaNoCarrinho(item)}>
+                  <div>
+                    <button
+                      className="primary-button w-full text-sm"
+                      onClick={() => adicionaNoCarrinho(item)}
+                    >
                       <strong>Adicionar ao carrinho</strong>
                     </button>
                   </div>
@@ -62,7 +70,7 @@ export function Pesquisa(props) {
             })}
           </>
         ) : (
-          <div className="mensagemDeNaoEncontrado">
+          <div className="w-full py-16 text-center">
             <h2>Não encontramos o seu livro.</h2>
             <h3>Você encontra mais opções em nossa home!!</h3>
           </div>

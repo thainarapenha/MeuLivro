@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "@/services/api";
 
 function formatarPreco(preco) {
   if (preco === null || preco === undefined || preco === "") {

@@ -1,10 +1,10 @@
 import { createContext, useEffect, useState } from "react";
-import { getCurrentCustomer } from "../services/authApi";
+import { getCurrentCustomer } from "@/services/authApi";
 import {
   clearAuthSession,
   getAuthSession,
   saveAuthSession,
-} from "../services/authStorage";
+} from "@/services/authStorage";
 
 export const loginContext = createContext({});
 

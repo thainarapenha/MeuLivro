@@ -1,5 +1,5 @@
 import axios from "axios";
-import { clearAuthSession, getAuthToken } from "./authStorage";
+import { clearAuthSession, getAuthToken } from "@/services/authStorage";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",

@@ -1,8 +1,7 @@
 import { useState } from "react";
 
-import S from "./header.module.css";
-import branco from "../../assets/logo_livraria_branco.png";
-import preto from "../../assets/logo_livraria_preto.png";
+import branco from "@/assets/logo_livraria_branco.png";
+import preto from "@/assets/logo_livraria_preto.png";
 
 export const Logo = () => {
   const [over, setOver] = useState(false);
@@ -10,11 +9,15 @@ export const Logo = () => {
     <div
       onMouseOver={() => setOver(true)}
       onMouseOut={() => setOver(false)}
-      className={S.logo}
+      className="flex items-center gap-3"
     >
-      <img className={S.imagem_logo} src={over ? branco : preto} />
+      <img
+        className="h-11 w-11 object-contain"
+        src={over ? branco : preto}
+        alt=""
+      />
 
-      <h1 className={S.texto_logo}> Meu livro </h1>
+      <h1 className="text-xl font-black tracking-tight">Meu livro</h1>
     </div>
   );
 };

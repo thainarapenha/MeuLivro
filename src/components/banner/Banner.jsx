@@ -1,39 +1,15 @@
-import mulherFelizERelaxada from "../../assets/mulher-feliz-e-relaxada.png";
-import livroBanner1 from "../../assets/livro-banner-1.png";
-import livroBanner2 from "../../assets/livro-banner-2.png";
-import livroBanner3 from "../../assets/livro-banner-3.png";
-import styles from "./Banner.module.css";
+import bannerHero from "@/assets/jpg/banner-hero.jpg";
 
 export function Banner() {
   return (
-    <div className={styles.banner}>
-      <div>
-        <h1>Nunca foi tão fácil encontrar meu livro!!</h1>
+    <section className="bg-white">
+      <div className="mx-auto flex w-full justify-center pb-6 sm:pb-6">
+        <img
+          src={bannerHero}
+          alt="Banner principal da livraria"
+          className="h-auto max-h-[620px] w-[100%] object-cover object-center"
+        />
       </div>
-
-      <div className={styles.anuncio}>
-        <div className={styles.anuncioDesconto}>
-          <strong>
-            Coleção
-            <br />
-            de livros
-          </strong>
-          <aside>
-            <p>com até</p>
-            <div>
-              <span>10</span>
-              <span>%OFF</span>
-            </div>
-          </aside>
-        </div>
-        <img className={styles.imgBanner} src={mulherFelizERelaxada} />
-
-        <div className={styles.livrosDesconto}>
-          <img src={livroBanner1} alt="" />
-          <img src={livroBanner2} alt="" />
-          <img src={livroBanner3} alt="" />
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

@@ -1,95 +1,76 @@
 import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginContext } from "../../contexts/loginContext";
-import { loginCustomer } from "../../services/authApi";
-
-import styles from "./login.module.css";
-
+import { loginContext } from "@/contexts/loginContext";
+import { loginCustomer } from "@/services/authApi";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export const Login = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const { login } = useContext(loginContext);
   const navigate = useNavigate();
-
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-    });
+    window.scrollTo({ top: 0 });
   }, []);
-
   async function evento(event) {
     event.preventDefault();
-
     try {
       const authenticatedSession = await loginCustomer(credentials);
       toast.success("Login efetuado com sucesso", {
         position: toast.POSITION.TOP_CENTER,
       });
-
       setCredentials({ email: "", password: "" });
       login(authenticatedSession);
       navigate("/");
     } catch (error) {
-      if (error.response?.status === 401) {
-        toast.error("Email e/ou senha inválidos", {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      } else if (error.response?.status === 400) {
-        toast.error(error.response.data?.error || "Confira os dados informados", {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      } else if (!error.response) {
-        toast.error("Não foi possível acessar o servidor", {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      } else {
-        toast.error("Ocorreu um erro inesperado. Tente novamente", {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
+      const status = error.response?.status;
+      const message =
+        status === 401
+          ? "Email e/ou senha inválidos"
+          : status === 400
+            ? error.response.data?.error || "Confira os dados informados"
+            : !error.response
+              ? "Não foi possível acessar o servidor"
+              : "Ocorreu um erro inesperado. Tente novamente";
+      toast.error(message, { position: toast.POSITION.TOP_CENTER });
     }
   }
-
   return (
-    <main className={styles.main}>
-      <h2>Faça seu login</h2>
-      <p className={styles.paragrafo}>
-        Ficamos felizes em ter você por aqui. Entre para prosseguir e tenha
-        acesso a diversos livros e obtenha uma experiência de compra incrível!
+    <main className="mx-auto my-16 flex max-w-xl flex-col items-center gap-6 px-6 text-center">
+      <h1 className="text-4xl font-black">Faça seu login</h1>
+      <p className="text-slate-500">
+        Entre para prosseguir e tenha acesso a diversos livros e uma experiência
+        de compra incrível.
       </p>
-
-      <form onSubmit={evento} className={styles.formulario}>
+      <form onSubmit={evento} className="flex w-full flex-col gap-4">
         <input
+          className="field"
+          value={credentials.email}
           onChange={(e) =>
             setCredentials({ ...credentials, email: e.target.value })
           }
-          className={styles.campo}
-          value={credentials.email}
           type="email"
           required
           placeholder="Digite seu email"
         />
         <input
+          className="field"
+          value={credentials.password}
           onChange={(e) =>
             setCredentials({ ...credentials, password: e.target.value })
           }
-          className={styles.campo}
-          value={credentials.password}
           type="password"
           required
           placeholder="Digite sua senha"
         />
-
-        <button className={styles.enviar} type="submit">
+        <button className="primary-button w-full" type="submit">
           Entrar
         </button>
       </form>
-
-      <p>Ou, se você ainda não é cliente:</p>
-      <Link className={styles.linkCadastro} to="/cadastro">
-        <button className={styles.cadastro}>Cadastre-se</button>
+      <p className="text-slate-500">Ou, se você ainda não é cliente:</p>
+      <Link className="w-full" to="/cadastro">
+        <button className="w-full rounded-xl bg-ink px-5 py-3 font-bold text-white transition hover:bg-slate-700">
+          Cadastre-se
+        </button>
       </Link>
     </main>
   );
