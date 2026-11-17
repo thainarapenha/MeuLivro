@@ -1,88 +1,157 @@
-import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, SignIn, SignOut, UserCircle } from "phosphor-react";
-import { loginContext } from "@/contexts/loginContext";
-import { carrinhoContext } from "@/contexts/carrinhoContext";
-import { Logo } from "@/components/Header/logoHeader.jsx";
+import { useContext, useState } from "react"
+import { Link, useNavigate, useLocation } from "react-router-dom"
+import {
+  ShoppingCart,
+  UserCircle,
+  SignOut,
+  MagnifyingGlass,
+} from "phosphor-react"
+import { loginContext } from "@/contexts/loginContext"
+import { carrinhoContext } from "@/contexts/carrinhoContext"
+import { AuthModal } from "@/components/AuthModal/AuthModal.jsx"
 
 export function Header({ book = [], setPesquisado }) {
-  const [digitado, setDigitado] = useState("");
-  const { isAuthenticated, customer, logout } = useContext(loginContext);
-  const { carrinho } = useContext(carrinhoContext);
-  const navigate = useNavigate();
-  function handleClick(event) {
-    event.preventDefault();
-    const resultadoPesquisa = book.filter((livro) =>
-      livro.titulo.toLowerCase().includes(digitado.toLowerCase())
-    );
-    navigate("/pesquisa", { state: resultadoPesquisa });
-    setPesquisado(digitado);
-    setDigitado("");
+  const [digitado, setDigitado] = useState("")
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authInitialTab, setAuthInitialTab] = useState("login")
+
+  const { isAuthenticated, customer, logout } = useContext(loginContext)
+  const { carrinho } = useContext(carrinhoContext)
+
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const isHome = location.pathname === "/"
+
+  function openAuthModal(tab) {
+    setAuthInitialTab(tab)
+    setAuthModalOpen(true)
   }
+
+  function handleSearch(event) {
+    event.preventDefault()
+
+    const termo = digitado.trim()
+
+    if (!termo) return
+
+    const resultadoPesquisa = book.filter((livro) =>
+      livro.titulo.toLowerCase().includes(termo.toLowerCase())
+    )
+
+    setPesquisado(termo)
+    setDigitado("")
+
+    navigate("/pesquisa", { state: resultadoPesquisa })
+  }
+
   return (
-    <header className="sticky top-0 z-20 border-b border-yellow-500/30 bg-brand shadow-sm">
-      <div className="mx-auto flex min-h-[76px] max-w-7xl items-center gap-4 px-4 py-3 lg:px-8">
-        <Link to="/" className="shrink-0">
-          <Logo />
-        </Link>
-        <form
-          onSubmit={handleClick}
-          className="flex min-w-0 flex-1 rounded-xl bg-white shadow-inner"
+    <>
+      <header className="absolute left-0 top-0 z-20 w-full px-4 pt-4 sm:px-6">
+        <div
+          className={`mx-auto grid min-h-[76px] max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-full border px-4 py-3 text-black shadow-lg backdrop-blur-sm transition-colors duration-300 sm:gap-4 sm:px-5 lg:px-8 ${
+            isHome
+              ? "border-white/30 bg-white/20"
+              : "border-slate-200/70 bg-white/85"
+          }`}
         >
-          <input
-            className="min-w-0 flex-1 rounded-xl bg-transparent px-4 py-3 outline-none placeholder:text-slate-400"
-            value={digitado}
-            onChange={(e) => setDigitado(e.target.value)}
-            placeholder="Buscar um livro..."
-          />
-          <button
-            className="rounded-r-xl px-4 text-xl transition hover:bg-slate-100"
-            type="submit"
-            aria-label="Buscar"
+          {/* Logo */}
+          <Link to="/" className="justify-self-start text-black">
+            <span className="whitespace-nowrap text-lg font-black tracking-tight sm:text-xl">
+              Meu Livro
+            </span>
+          </Link>
+
+          {/* Pesquisa */}
+          <form
+            onSubmit={handleSearch}
+            className="mx-auto flex w-full max-w-[580px] min-w-0 rounded-xl bg-white shadow-inner"
           >
-            ⌕
-          </button>
-        </form>
-        <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 sm:flex">
+            <input
+              className="min-w-0 flex-1 rounded-l-xl bg-transparent px-3 py-2 text-sm text-black outline-none placeholder:text-slate-400 sm:px-4"
+              value={digitado}
+              onChange={(event) => setDigitado(event.target.value)}
+              placeholder="Buscar um livro..."
+              aria-label="Buscar um livro"
+            />
+
+            <button
+              type="submit"
+              aria-label="Buscar"
+              className="rounded-r-xl px-3 text-slate-700 transition hover:bg-slate-100 sm:px-4"
+            >
+              <MagnifyingGlass size={20} />
+            </button>
+          </form>
+
+          {/* Usuário e carrinho */}
+          <div className="flex items-center justify-self-end gap-2 sm:gap-3">
             {isAuthenticated ? (
-              <SignOut size={28} className="cursor-pointer" onClick={logout} />
-            ) : (
-              <SignIn
-                size={28}
-                className="cursor-pointer"
-                onClick={() => navigate("/login")}
-              />
-            )}
-            <span className="max-w-[125px] text-xs font-bold leading-tight">
-              {isAuthenticated ? (
-                <>
-                  Olá, {customer?.name?.split(" ")[0]}
-                  <button className="block underline" onClick={logout}>
+              <div className="flex items-center gap-1 text-black sm:gap-2">
+                <UserCircle size={30} />
+
+                <div className="hidden text-xs leading-tight sm:block">
+                  <span className="block font-bold">
+                    Olá, {customer?.name?.split(" ")[0] || "Usuário"}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="font-medium underline"
+                  >
                     Sair
                   </button>
-                </>
-              ) : (
-                <Link to="/login" className="underline">
-                  Entre ou cadastre-se
-                </Link>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={logout}
+                  aria-label="Sair da conta"
+                  className="rounded-lg p-2 transition hover:bg-black/5"
+                >
+                  <SignOut size={22} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-black">
+                <UserCircle size={30} />
+
+                <div className="hidden text-xs leading-tight sm:block">
+                  <span className="block font-bold">Meu Livro</span>
+
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal("login")}
+                  >
+                    Entre ou Cadastre-se
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <Link
+              to="/carrinho"
+              className="relative rounded-lg p-2 text-black transition hover:bg-black/5"
+              aria-label="Carrinho"
+            >
+              <ShoppingCart size={27} />
+
+              {carrinho.length > 0 && (
+                <span className="absolute -right-1 -top-1 rounded-full bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
+                  {carrinho.length}
+                </span>
               )}
-            </span>
+            </Link>
           </div>
-          <Link
-            to="/carrinho"
-            className="relative rounded-lg p-2 transition hover:bg-yellow-400"
-            aria-label="Carrinho"
-          >
-            <ShoppingCart size={29} />
-            {carrinho.length ? (
-              <span className="absolute -right-1 -top-1 rounded-full bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
-                {carrinho.length}
-              </span>
-            ) : null}
-          </Link>
         </div>
-      </div>
-    </header>
-  );
+      </header>
+
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+        initialTab={authInitialTab}
+      />
+    </>
+  )
 }

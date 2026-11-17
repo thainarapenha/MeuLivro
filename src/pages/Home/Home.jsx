@@ -1,11 +1,11 @@
-import { Banner } from "@/components/banner/Banner.jsx";
-import { CardProduto } from "@/components/cardProduto/CardProduto.jsx";
-import { Novidades } from "@/components/Section/Novidades/Novidades.jsx";
-import { Loading } from "@/components/Loading/Loading.jsx";
+import { Banner } from "@/components/banner/Banner.jsx"
+import { CardProduto } from "@/components/cardProduto/CardProduto.jsx"
+import { Novidades } from "@/components/Section/Novidades.jsx"
+import { Loading } from "@/components/Loading/Loading.jsx"
 
 export const Home = ({ book, catalogoCarregando, catalogoErro }) => {
   if (catalogoCarregando) {
-    return <Loading />;
+    return <Loading />
   }
 
   if (catalogoErro) {
@@ -19,7 +19,7 @@ export const Home = ({ book, catalogoCarregando, catalogoErro }) => {
           Verifique sua conexão e tente novamente.
         </p>
       </div>
-    );
+    )
   }
 
   if (!book.length) {
@@ -27,7 +27,7 @@ export const Home = ({ book, catalogoCarregando, catalogoErro }) => {
       <div className="px-6 py-24 text-center">
         <h2 className="text-2xl font-black">O catálogo está vazio.</h2>
       </div>
-    );
+    )
   }
 
   return (
@@ -36,5 +36,5 @@ export const Home = ({ book, catalogoCarregando, catalogoErro }) => {
       <CardProduto book={book} />
       <Novidades />
     </>
-  );
-};
+  )
+}
