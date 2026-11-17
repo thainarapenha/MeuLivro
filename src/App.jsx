@@ -43,7 +43,11 @@ export function App() {
     <div>
       <BrowserRouter>
         <LoginProvider>
-          <CarrinhoProvider>
+          <CarrinhoProvider
+            book={book}
+            catalogLoading={catalogoCarregando}
+            catalogError={catalogoErro}
+          >
             <Header book={book} setPesquisado={setPesquisado} />
 
             <Routes>
