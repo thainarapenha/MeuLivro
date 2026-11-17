@@ -11,7 +11,7 @@ import styles from "./Carrinho.module.css";
 export function Carrinho() {
   const { carrinho, totalDoCarrinho, checkoutCarrinho } =
     useContext(carrinhoContext);
-  const { logado } = useContext(loginContext);
+  const { isAuthenticated } = useContext(loginContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function Carrinho() {
   }, []);
 
   function checkout() {
-    if (logado) {
+    if (isAuthenticated) {
       toast.success("Compra efetuada com sucesso", {
         position: toast.POSITION.TOP_CENTER,
       });

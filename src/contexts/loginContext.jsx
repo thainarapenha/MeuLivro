@@ -1,38 +1,74 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { getCurrentCustomer } from "../services/authApi";
+import {
+  clearAuthSession,
+  getAuthSession,
+  saveAuthSession,
+} from "../services/authStorage";
 
 export const loginContext = createContext({});
 
 export function LoginProvider({ children }) {
-  const [logado, setLogado] = useState(false);
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  function useLocalStorage() {
-    const usuario = JSON.parse(localStorage.getItem("@meuLivroLogin"));
+  useEffect(() => {
+    let active = true;
+    const storedSession = getAuthSession();
 
-    if (!usuario) {
-      return false;
-    } else {
-      setLogado(true);
-      return usuario;
+    const finishLoading = () => {
+      if (active) setAuthLoading(false);
+    };
+
+    if (!storedSession?.token) {
+      clearAuthSession();
+      finishLoading();
+      return () => {
+        active = false;
+      };
     }
+
+    getCurrentCustomer()
+      .then((customer) => {
+        if (active) setSession({ token: storedSession.token, customer });
+      })
+      .catch(() => {
+        clearAuthSession();
+        if (active) setSession(null);
+      })
+      .finally(finishLoading);
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleAuthLogout = () => setSession(null);
+
+    window.addEventListener("auth:logout", handleAuthLogout);
+    return () => window.removeEventListener("auth:logout", handleAuthLogout);
+  }, []);
+
+  function login(authenticatedSession) {
+    saveAuthSession(authenticatedSession);
+    setSession(authenticatedSession);
   }
 
-  function loginLocalStorage(usuario) {
-    localStorage.setItem("@meuLivroLogin", JSON.stringify(usuario));
-    setLogado(true);
-  }
-
-  function logoutLocalStorage() {
-    localStorage.clear();
-    window.location.reload();
+  function logout() {
+    clearAuthSession();
+    setSession(null);
   }
 
   return (
     <loginContext.Provider
       value={{
-        logado,
-        useLocalStorage,
-        loginLocalStorage,
-        logoutLocalStorage,
+        logado: Boolean(session),
+        isAuthenticated: Boolean(session),
+        authLoading,
+        customer: session?.customer || null,
+        login,
+        logout,
       }}
     >
       {children}

@@ -7,13 +7,29 @@ import { Categoria } from "../../components/categorias/Categorias.jsx";
 import { Loading } from "../../components/Loading/Loading.jsx";
 
 export const Home = (props) => {
-  const { book, setBook } = props;
+  const { book, catalogoCarregando, catalogoErro } = props;
 
-  if (!book.length) {
+  if (catalogoCarregando) {
     return (
       <div>
         <Loading />
-        <CardProduto book={book} setBook={setBook} />
+      </div>
+    );
+  }
+
+  if (catalogoErro) {
+    return (
+      <div style={{ textAlign: "center", padding: "64px 20px" }}>
+        <h2>Não foi possível carregar o catálogo.</h2>
+        <p>Verifique sua conexão e tente novamente.</p>
+      </div>
+    );
+  }
+
+  if (!book.length) {
+    return (
+      <div style={{ textAlign: "center", padding: "64px 20px" }}>
+        <h2>O catálogo está vazio.</h2>
       </div>
     );
   }
@@ -22,7 +38,7 @@ export const Home = (props) => {
     <div>
       <Banner />
       <Vantagens />
-      <CardProduto book={book} setBook={setBook} />
+      <CardProduto book={book} />
       <Categoria />
       <Editoras />
       <Novidades />

@@ -1,24 +1,14 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useRef, useContext } from "react";
 import { carrinhoContext } from "../../contexts/carrinhoContext";
 import { Link } from "react-router-dom";
 import setas from "../../assets/seta_icon.png";
 
-import api from "../../services/api";
 import styles from "./CardProduto.module.css";
 
 export function CardProduto(props) {
-  const { book, setBook } = props
+  const { book } = props;
   const carousel = useRef(null);
   const { adicionaNoCarrinho } = useContext(carrinhoContext);
-
-  useEffect(() => {
-    api
-      .get("/livros")
-      .then((response) => setBook(response.data))
-      .catch((err) => {
-        console.error("ops! ocorreu um erro" + err);
-      });
-  }, []);
 
   const handleLeftClick = (e) => {
     e.preventDefault();

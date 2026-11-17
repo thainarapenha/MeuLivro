@@ -2,13 +2,14 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import avaliacaoCliente from "../../assets/avaliação-do-cliente.png";
 import styles from "./DetalhesProduto.module.css";
-import api from "../../services/api";
+import { buscarLivro } from "../../services/livrosApi";
 import { carrinhoContext } from "../../contexts/carrinhoContext";
 import { Loading } from "../../components/Loading/Loading";
 
 export function DetalhesProduto() {
   const [leiaMais, setLeiaMais] = useState(true);
   const [livro, setLivro] = useState(null);
+  const [erro, setErro] = useState(false);
 
   const { id } = useParams();
   const { adicionaNoCarrinho } = useContext(carrinhoContext);
@@ -24,13 +25,22 @@ export function DetalhesProduto() {
       top: 0,
     });
 
-    api
-      .get(`/livros/${id}`)
-      .then((response) => setLivro(response.data[0]))
+    buscarLivro(id)
+      .then((livroEncontrado) => setLivro(livroEncontrado))
       .catch((err) => {
-        console.error("ops! ocorreu um erro" + err);
+        console.error("Não foi possível carregar o livro", err);
+        setErro(true);
       });
   }, []);
+
+  if (erro) {
+    return (
+      <div className={styles.detalhesContainer}>
+        <h2>Livro não encontrado.</h2>
+        <p>Não foi possível carregar os detalhes deste livro.</p>
+      </div>
+    );
+  }
 
   if (!livro) {
     return <Loading />;

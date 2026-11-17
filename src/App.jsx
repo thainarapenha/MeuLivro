@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -16,22 +16,46 @@ import { CarrinhoProvider } from "./contexts/carrinhoContext";
 import { ToastContainer } from "react-toastify";
 import { DetalhesProduto } from "./pages/detalhesProduto/DetalhesProduto";
 import { Pesquisa } from "./pages/pesquisa/Pesquisa";
+import { listarLivros } from "./services/livrosApi";
 
 export function App() {
   const [book, setBook] = useState([]);
   const [pesquisado, setPesquisado] = useState("");
+  const [catalogoCarregando, setCatalogoCarregando] = useState(true);
+  const [catalogoErro, setCatalogoErro] = useState(false);
+  const catalogoSolicitado = useRef(false);
+
+  useEffect(() => {
+    if (catalogoSolicitado.current) return;
+
+    catalogoSolicitado.current = true;
+
+    listarLivros()
+      .then((livros) => setBook(livros))
+      .catch((erro) => {
+        console.error("Não foi possível carregar o catálogo", erro);
+        setCatalogoErro(true);
+      })
+      .finally(() => setCatalogoCarregando(false));
+  }, []);
 
   return (
     <div>
       <BrowserRouter>
         <LoginProvider>
           <CarrinhoProvider>
-            <Header setBook={setBook} setPesquisado={setPesquisado} />
+            <Header book={book} setPesquisado={setPesquisado} />
 
             <Routes>
               <Route
                 path="/"
-                element={<Home setBook={setBook} book={book} />}
+                element={
+                  <Home
+                    book={book}
+                    catalogoCarregando={catalogoCarregando}
+                    catalogoErro={catalogoErro}
+                  />
+                }
               />
               <Route path="/cadastro" element={<Cadastro />} />
               <Route path="/login" element={<Login />} />

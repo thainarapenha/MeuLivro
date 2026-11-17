@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registrarUsuario } from "../../services/usuarioApi";
-import { validaDadosDeCadastro } from "../../utils/validaFormulario";
+import { registerCustomer } from "../../services/authApi";
+import { validateRegistrationData } from "../../utils/validaFormulario";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,13 +10,10 @@ import styles from "./Cadastro.module.css";
 
 export function Cadastro() {
   const navigate = useNavigate();
-  const [dadosUsuario, setDadosUsuario] = useState({
-    nome: "",
+  const [customerData, setCustomerData] = useState({
+    name: "",
     email: "",
-    senha: "",
-    cpf: "",
-    cep: "",
-    endereco: { localidade: "", uf: "", logradouro: "" },
+    password: "",
   });
 
   const toastAlertErro = (mensagem) =>
@@ -29,67 +26,33 @@ export function Cadastro() {
       position: toast.POSITION.TOP_CENTER,
     });
 
-  async function buscaCep(event) {
-    console.log(event.target.value);
-    try {
-      const res = await fetch(
-        `https://viacep.com.br/ws/${event.target.value}/json/`
-      );
-
-      const data = await res.json();
-      const { localidade, uf, logradouro } = data;
-
-      if (data.erro) {
-        toastAlertErro("CEP informado não foi encontrado");
-        return;
-      }
-
-      setDadosUsuario({
-        ...dadosUsuario,
-        endereco: {
-          localidade,
-          uf,
-          logradouro,
-        },
-      });
-    } catch (erro) {
-      toastAlertErro("Insira um CEP válido");
-    }
-  }
-
-  function verificaInputsNumericos(event) {
-    const numeros = event.target.value.replace(/[^\d\s.-]/gi, "");
-
-    if (event.target.id === "cpf") {
-      setDadosUsuario({ ...dadosUsuario, cpf: numeros });
-    }
-
-    if (event.target.id === "cep") {
-      setDadosUsuario({ ...dadosUsuario, cep: numeros });
-    }
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const validacao = validaDadosDeCadastro(dadosUsuario);
+    const validation = validateRegistrationData(customerData);
 
-    if (validacao.erro) {
-      toastAlertErro(validacao.mensagem);
+    if (validation.error) {
+      toastAlertErro(validation.message);
       return;
     }
 
-    const resposta = await toast.promise(registrarUsuario(dadosUsuario), {
-      position: toast.POSITION.BOTTOM_CENTER,
-      pending: "Cadastrando usuário no banco de dados",
-      error: "Erro ao acessar o banco de dados",
-    });
-
-    if (resposta.message.includes("repetido")) {
-      toastAlertErro("Este email já está cadastrado");
-    } else {
+    try {
+      await registerCustomer(customerData);
       toastAlertSucesso("Cadastro efetuado com sucesso");
       navigate("/login");
+    } catch (error) {
+      const status = error.response?.status;
+      const message = error.response?.data?.error;
+
+      if (status === 409) {
+        toastAlertErro("Este email já está cadastrado");
+      } else if (status === 400) {
+        toastAlertErro(message || "Confira os dados informados");
+      } else if (!error.response) {
+        toastAlertErro("Não foi possível acessar o servidor");
+      } else {
+        toastAlertErro("Ocorreu um erro inesperado. Tente novamente");
+      }
     }
   }
 
@@ -101,65 +64,13 @@ export function Cadastro() {
         <input
           placeholder="Nome"
           type="text"
-          id="nome"
+          id="name"
           required
-          value={dadosUsuario.nome}
+          value={customerData.name}
           onChange={(e) =>
-            setDadosUsuario({ ...dadosUsuario, nome: e.target.value })
+            setCustomerData({ ...customerData, name: e.target.value })
           }
         />
-        <div className={styles.infoPessoal}>
-          <div>
-            <input
-              className={styles.cpf}
-              placeholder="CPF"
-              type="text"
-              id="cpf"
-              required
-              value={dadosUsuario.cpf}
-              onChange={verificaInputsNumericos}
-            />
-
-            <input
-              placeholder="CEP"
-              type="text"
-              id="cep"
-              onBlur={buscaCep}
-              required
-              value={dadosUsuario.cep}
-              onChange={verificaInputsNumericos}
-            />
-          </div>
-          <div className={styles.endereco}>
-            <input
-              placeholder="Rua"
-              type="text"
-              id="rua"
-              required
-              readOnly
-              value={dadosUsuario.endereco.logradouro}
-            />
-            <div className={styles.cidade}>
-              <input
-                placeholder="Cidade"
-                type="text"
-                id="cidade"
-                required
-                readOnly
-                value={dadosUsuario.endereco.localidade}
-              />
-              <input
-                placeholder="UF"
-                type="text"
-                id="uf"
-                required
-                readOnly
-                value={dadosUsuario.endereco.uf}
-              />
-            </div>
-          </div>
-        </div>
-
         <div>
           <input
             className={styles.email}
@@ -167,19 +78,19 @@ export function Cadastro() {
             type="email"
             id="email"
             required
-            value={dadosUsuario.email}
+            value={customerData.email}
             onChange={(e) =>
-              setDadosUsuario({ ...dadosUsuario, email: e.target.value })
+              setCustomerData({ ...customerData, email: e.target.value })
             }
           />
           <input
             type="password"
             placeholder="Senha"
-            id="senha"
+            id="password"
             required
-            value={dadosUsuario.senha}
+            value={customerData.password}
             onChange={(e) =>
-              setDadosUsuario({ ...dadosUsuario, senha: e.target.value })
+              setCustomerData({ ...customerData, password: e.target.value })
             }
           />
         </div>
