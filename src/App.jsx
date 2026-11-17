@@ -1,73 +1,74 @@
 import { useEffect, useRef, useState } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { ToastContainer } from "react-toastify"
 
 import "@/global.css"
 import "react-toastify/dist/ReactToastify.css"
 
-import { Home } from "@/pages/Home/Home.jsx"
-// import { Cadastro } from "@/pages/cadastro/Cadastro"
-// import { Login } from "@/pages/Login/Login"
-import { LoginProvider } from "@/contexts/loginContext"
-import { Carrinho } from "@/pages/carrinho/Carrinho"
-import { Header } from "@/components/Header"
-import { CarrinhoProvider } from "@/contexts/carrinhoContext"
-import { ToastContainer } from "react-toastify"
-import { DetalhesProduto } from "@/pages/detalhesProduto/DetalhesProduto"
-import { Pesquisa } from "@/pages/pesquisa/Pesquisa"
-import { listarLivros } from "@/services/livrosApi"
+import { Header } from "@/components/Header/Header.jsx"
+import { LoginProvider } from "@/contexts/LoginContext"
+import { CartProvider } from "@/contexts/CartContext"
+
+import { listBooks } from "@/services/booksApi"
+
+import { HomePresenterScreen } from "@/pages/HomePresenterScreen"
+import { CartPresenterScreen } from "@/pages/CartPresenterScreen"
+import { ProductDetailsPresenterScreen } from "@/pages/ProductDetailsPresenterScreen"
+import { SearchPresenterScreen } from "@/pages/SearchPresenterScreen"
 
 export function App() {
-  const [book, setBook] = useState([])
-  const [pesquisado, setPesquisado] = useState("")
-  const [catalogoCarregando, setCatalogoCarregando] = useState(true)
-  const [catalogoErro, setCatalogoErro] = useState(false)
-  const catalogoSolicitado = useRef(false)
+  const [books, setBooks] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [catalogLoading, setCatalogLoading] = useState(true)
+  const [catalogError, setCatalogError] = useState(false)
+  const catalogRequestStarted = useRef(false)
 
   useEffect(() => {
-    if (catalogoSolicitado.current) return
+    if (catalogRequestStarted.current) return
 
-    catalogoSolicitado.current = true
+    catalogRequestStarted.current = true
 
-    listarLivros()
-      .then((livros) => setBook(livros))
-      .catch((erro) => {
-        console.error("Não foi possível carregar o catálogo", erro)
-        setCatalogoErro(true)
+    listBooks()
+      .then((loadedBooks) => setBooks(loadedBooks))
+      .catch((error) => {
+        console.error("Não foi possível carregar o catálogo", error)
+        setCatalogError(true)
       })
-      .finally(() => setCatalogoCarregando(false))
+      .finally(() => setCatalogLoading(false))
   }, [])
 
   return (
     <BrowserRouter>
       <LoginProvider>
-        <CarrinhoProvider
-          book={book}
-          catalogLoading={catalogoCarregando}
-          catalogError={catalogoErro}
+        <CartProvider
+          catalog={books}
+          catalogLoading={catalogLoading}
+          catalogError={catalogError}
         >
-          <Header book={book} setPesquisado={setPesquisado} />
+          <Header books={books} setSearchQuery={setSearchQuery} />
 
           <Routes>
             <Route
               path="/"
               element={
-                <Home
-                  book={book}
-                  catalogoCarregando={catalogoCarregando}
-                  catalogoErro={catalogoErro}
+                <HomePresenterScreen
+                  books={books}
+                  catalogLoading={catalogLoading}
+                  catalogError={catalogError}
                 />
               }
             />
-            {/* <Route path="/cadastro" element={<Cadastro />} />
-            <Route path="/login" element={<Login />} /> */}
-            <Route path="/carrinho" element={<Carrinho />} />
-            <Route path="/detalhes/:id" element={<DetalhesProduto />} />
+            <Route path="/carrinho" element={<CartPresenterScreen />} />
+            <Route
+              path="/detalhes/:id"
+              element={<ProductDetailsPresenterScreen />}
+            />
             <Route
               path="/pesquisa"
-              element={<Pesquisa pesquisado={pesquisado} />}
+              element={<SearchPresenterScreen searchQuery={searchQuery} />}
             />
           </Routes>
-        </CarrinhoProvider>
+        </CartProvider>
 
         <ToastContainer
           position="top-center"

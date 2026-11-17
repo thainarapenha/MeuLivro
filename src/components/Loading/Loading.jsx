@@ -1,4 +1,4 @@
-export function Loading() {
+export const Loading = () => {
   return (
     <div className="flex min-h-[55vh] items-center justify-center">
       <div
@@ -6,5 +6,5 @@ export function Loading() {
         aria-label="Carregando"
       />
     </div>
-  );
+  )
 }

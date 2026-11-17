@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { toast } from "react-toastify";
-import newsletter from "@/assets/jpg/newsletter.jpg";
+import { useState } from "react"
+import { toast } from "react-toastify"
+import newsletter from "@/assets/jpg/newsletter.jpg"
 
-export const Novidades = () => {
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
+export const Newsletters = () => {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
 
-  const submit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault()
 
-    if (!nome.trim() || !email.trim()) return;
+    if (!name.trim() || !email.trim()) return
 
     toast.success("Ótima escolha! Iremos enviar nossos conteúdos para você.", {
       position: toast.POSITION.TOP_CENTER,
-    });
+    })
 
-    setNome("");
-    setEmail("");
-  };
+    setName("")
+    setEmail("")
+  }
 
   return (
     <section className="bg-white px-4 py-8 sm:px-6 lg:px-8">
@@ -41,13 +41,13 @@ export const Novidades = () => {
           </p>
 
           <form
-            onSubmit={submit}
+            onSubmit={handleSubmit}
             className="mt-8 grid gap-3 md:grid-cols-[1fr_1fr_auto]"
           >
             <input
               type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
               placeholder="Seu nome"
               aria-label="Seu nome"
               autoComplete="name"
@@ -68,7 +68,7 @@ export const Novidades = () => {
 
             <button
               type="submit"
-              disabled={!nome.trim() || !email.trim()}
+              disabled={!name.trim() || !email.trim()}
               className="rounded-xl bg-ink px-7 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Inscrever-se
@@ -77,5 +77,5 @@ export const Novidades = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}

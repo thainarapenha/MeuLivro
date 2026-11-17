@@ -1,34 +1,34 @@
-import { useContext, useEffect } from "react";
-import { useLocation, Link, useNavigate } from "react-router-dom";
-import { carrinhoContext } from "@/contexts/carrinhoContext";
+import { useContext, useEffect } from "react"
+import { useLocation, Link, useNavigate } from "react-router-dom"
+import { CartContext } from "@/contexts/CartContext"
 
-export function Pesquisa(props) {
-  const { adicionaNoCarrinho } = useContext(carrinhoContext);
-  const { state } = useLocation();
-  const navigate = useNavigate();
+export const SearchPresenterScreen = ({ searchQuery }) => {
+  const { addToCart } = useContext(CartContext)
+  const { state } = useLocation()
+  const navigate = useNavigate()
 
-  function MostrarMensagem() {
-    if (state.length > 0 || props.pesquisado.length > 0) {
-      return <h2>Resultados de : "{props.pesquisado}"</h2>;
+  function renderSearchMessage() {
+    if (state.length > 0 || searchQuery.length > 0) {
+      return <h2>Resultados de : "{searchQuery}"</h2>
     }
-    return <></>;
+    return <></>
   }
 
   useEffect(() => {
     window.scrollTo({
       top: 0,
-    });
+    })
 
     if (!state) {
-      navigate("/", { replaced: true });
+      navigate("/", { replaced: true })
     }
-  }, []);
+  }, [])
 
-  if (!state) return null;
+  if (!state) return null
 
   return (
     <div className="mx-auto my-12 min-h-[45vh] max-w-6xl px-6">
-      <MostrarMensagem className="mostrarMensagem" />
+      {renderSearchMessage()}
 
       <div className="mt-8 flex flex-wrap gap-5">
         {state.length > 0 ? (
@@ -39,34 +39,34 @@ export function Pesquisa(props) {
                   className="flex w-[220px] flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
                   key={index}
                 >
-                  <Link to={`/detalhes/${item.id_livro}`}>
+                  <Link to={`/detalhes/${item.id}`}>
                     <div className="flex h-64 items-center justify-center rounded-xl bg-slate-50 p-4">
                       <img
                         className="max-h-full max-w-full object-contain"
-                        src={item?.url_img}
-                        alt={item?.titulo}
+                        src={item?.imageUrl}
+                        alt={item?.title}
                       />
                     </div>
 
                     <div className="flex flex-1 flex-col justify-between gap-3 py-4">
                       <strong>
-                        <p className="font-bold">{item?.titulo}</p>
+                        <p className="font-bold">{item?.title}</p>
                       </strong>
                       <p className="font-black text-amber-600">
-                        R$ {item?.preco}
+                        R$ {item?.price}
                       </p>
                     </div>
                   </Link>
                   <div>
                     <button
                       className="primary-button w-full text-sm"
-                      onClick={() => adicionaNoCarrinho(item)}
+                      onClick={() => addToCart(item)}
                     >
                       <strong>Adicionar ao carrinho</strong>
                     </button>
                   </div>
                 </div>
-              );
+              )
             })}
           </>
         ) : (
@@ -77,5 +77,5 @@ export function Pesquisa(props) {
         )}
       </div>
     </div>
-  );
+  )
 }

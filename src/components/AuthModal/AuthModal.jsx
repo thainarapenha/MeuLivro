@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Eye, EyeSlash, X } from "phosphor-react"
-import { loginContext } from "@/contexts/loginContext"
+import { LoginContext } from "@/contexts/LoginContext"
 import { loginCustomer, registerCustomer } from "@/services/authApi"
-import { validateRegistrationData } from "@/utils/validaFormulario"
+import { validateRegistrationData } from "@/utils/validateForm"
 import { toast } from "react-toastify"
 
 function PasswordField({ name, placeholder, autoComplete }) {
@@ -32,16 +32,16 @@ function PasswordField({ name, placeholder, autoComplete }) {
   )
 }
 
-export function AuthModal({
+export const AuthModal = ({
   open,
   onOpenChange,
   initialTab = "login",
-}) {
+}) => {
   const [tab, setTab] = useState(initialTab)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const { login } = useContext(loginContext)
+  const { login } = useContext(LoginContext)
   const navigate = useNavigate()
 
   const isRegister = tab === "register"

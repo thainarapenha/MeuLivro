@@ -1,32 +1,32 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 
-import { ItemCarrinho } from "@/components/itemCarinho/ItemCarrinho";
-import { carrinhoContext } from "@/contexts/carrinhoContext";
-import { loginContext } from "@/contexts/loginContext";
-import { createOrder } from "@/services/ordersApi";
-import { Loading } from "@/components/Loading/Loading";
-import { toast } from "react-toastify";
+import { CartItems } from "@/components/CartItems/CartItems"
+import { CartContext } from "@/contexts/CartContext"
+import { LoginContext } from "@/contexts/LoginContext"
+import { createOrder } from "@/services/ordersApi"
+import { Loading } from "@/components/Loading/Loading"
+import { toast } from "react-toastify"
 
-export function Carrinho() {
+export const CartPresenterScreen = () => {
   const {
-    carrinho,
+    cart,
     unavailableItems,
     cartLoading,
-    checkoutCarrinho,
+    clearCart,
     removeUnavailableItem,
-    totalDoCarrinho,
-  } = useContext(carrinhoContext);
-  const { isAuthenticated, authLoading } = useContext(loginContext);
-  const [checkingOut, setCheckingOut] = useState(false);
-  const checkoutLock = useRef(false);
-  const navigate = useNavigate();
+    getCartTotal,
+  } = useContext(CartContext)
+  const { isAuthenticated, authLoading } = useContext(LoginContext)
+  const [checkingOut, setCheckingOut] = useState(false)
+  const checkoutLock = useRef(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     window.scrollTo({
       top: 0,
-    });
-  }, []);
+    })
+  }, [])
 
   async function checkout() {
     if (
@@ -34,89 +34,89 @@ export function Carrinho() {
       checkingOut ||
       cartLoading ||
       authLoading ||
-      !carrinho.length
+      !cart.length
     ) {
-      return;
+      return
     }
 
     if (!isAuthenticated) {
       toast.error("Faça login para prosseguir com a compra", {
         position: toast.POSITION.TOP_CENTER,
-      });
-      navigate("/login");
-      return;
+      })
+      navigate("/login")
+      return
     }
 
     if (unavailableItems.length) {
       toast.error("Remova os livros indisponíveis antes de finalizar", {
         position: toast.POSITION.TOP_CENTER,
-      });
-      return;
+      })
+      return
     }
 
-    const items = carrinho.map(({ item, quantidade }) => ({
-      book_id: Number(item.id_livro),
-      quantity: quantidade,
-    }));
+    const items = cart.map(({ item, quantity }) => ({
+      book_id: Number(item.id),
+      quantity,
+    }))
 
-    checkoutLock.current = true;
-    setCheckingOut(true);
+    checkoutLock.current = true
+    setCheckingOut(true)
 
     try {
-      const order = await createOrder(items);
+      const order = await createOrder(items)
 
-      checkoutCarrinho();
+      clearCart()
       toast.success(
         order?.id
           ? `Compra efetuada com sucesso. Pedido #${order.id}`
           : "Compra efetuada com sucesso",
         { position: toast.POSITION.TOP_CENTER }
-      );
-      navigate("/");
+      )
+      navigate("/")
     } catch (error) {
-      const status = error.response?.status;
+      const status = error.response?.status
 
       if (status === 400) {
         toast.error("Não foi possível processar os itens do carrinho", {
           position: toast.POSITION.TOP_CENTER,
-        });
+        })
       } else if (status === 401) {
         toast.error("Sua sessão expirou. Faça login para continuar", {
           position: toast.POSITION.TOP_CENTER,
-        });
-        navigate("/login");
+        })
+        navigate("/login")
       } else if (status === 404) {
         toast.error("Algum livro não está mais disponível", {
           position: toast.POSITION.TOP_CENTER,
-        });
+        })
       } else if (status === 409) {
         toast.error("A disponibilidade de estoque foi alterada", {
           position: toast.POSITION.TOP_CENTER,
-        });
+        })
       } else if (status === 500) {
         toast.error("Falha temporária ao concluir a compra", {
           position: toast.POSITION.TOP_CENTER,
-        });
+        })
       } else if (!error.response) {
         toast.error("Não foi possível acessar o servidor", {
           position: toast.POSITION.TOP_CENTER,
-        });
+        })
       } else {
         toast.error("Não foi possível concluir a compra", {
           position: toast.POSITION.TOP_CENTER,
-        });
+        })
       }
     } finally {
-      checkoutLock.current = false;
-      setCheckingOut(false);
+      checkoutLock.current = false
+      setCheckingOut(false)
     }
   }
 
   if (cartLoading) {
-    return <Loading />;
+    return <Loading />
   }
 
-  if (!carrinho.length && !unavailableItems.length) {
+  if (!cart.length && !unavailableItems.length) {
     return (
       <div className="mx-auto my-12 max-w-4xl rounded-3xl bg-white p-6 shadow-soft sm:p-12">
         <h1>Meu carrinho</h1>
@@ -127,7 +127,7 @@ export function Carrinho() {
           Seu carrinho está vazio :(
         </h2>
 
-        <div className={styles.botoes}>
+        <div>
           <Link
             to="/"
             className="primary-button mx-auto block max-w-md text-center"
@@ -136,7 +136,7 @@ export function Carrinho() {
           </Link>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -147,17 +147,17 @@ export function Carrinho() {
         <div style={{ marginBottom: "24px", textAlign: "center" }}>
           <h2>Itens indisponíveis</h2>
           <p>Remova os itens que não estão mais disponíveis para continuar.</p>
-          {unavailableItems.map(({ book_id, item, reason }) => (
-            <div key={book_id} style={{ margin: "12px 0" }}>
+          {unavailableItems.map(({ bookId, item, reason }) => (
+            <div key={bookId} style={{ margin: "12px 0" }}>
               <span>
-                {item?.titulo || `Livro #${book_id}`} —
+                {item?.title || `Livro #${bookId}`} —
                 {reason === "out_of_stock"
                   ? "sem estoque"
                   : reason === "catalog_error"
                     ? "não foi possível verificar"
                     : "não encontrado"}
               </span>{" "}
-              <button onClick={() => removeUnavailableItem(book_id)}>
+              <button onClick={() => removeUnavailableItem(bookId)}>
                 Remover
               </button>
             </div>
@@ -165,13 +165,13 @@ export function Carrinho() {
         </div>
       )}
 
-      {carrinho.map((produto, index) => {
-        return <ItemCarrinho key={index} produto={produto} />;
+      {cart.map((cartItem, index) => {
+        return <CartItems key={index} cartItem={cartItem} />
       })}
 
-      {carrinho.length > 0 && (
+      {cart.length > 0 && (
         <p className="mt-6 text-right text-2xl font-black">
-          Total: {totalDoCarrinho()}
+          Total: {getCartTotal()}
         </p>
       )}
 
@@ -183,12 +183,12 @@ export function Carrinho() {
           className="primary-button"
           onClick={checkout}
           disabled={
-            checkingOut || authLoading || cartLoading || !carrinho.length
+            checkingOut || authLoading || cartLoading || !cart.length
           }
         >
           {checkingOut ? "Processando..." : "Concluir compra"}
         </button>
       </div>
     </div>
-  );
+  )
 }

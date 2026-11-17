@@ -6,17 +6,17 @@ import {
   SignOut,
   MagnifyingGlass,
 } from "phosphor-react"
-import { loginContext } from "@/contexts/loginContext"
-import { carrinhoContext } from "@/contexts/carrinhoContext"
+import { LoginContext } from "@/contexts/LoginContext"
+import { CartContext } from "@/contexts/CartContext"
 import { AuthModal } from "@/components/AuthModal/AuthModal.jsx"
 
-export function Header({ book = [], setPesquisado }) {
-  const [digitado, setDigitado] = useState("")
+export const Header = ({ books = [], setSearchQuery }) => {
+  const [searchInput, setSearchInput] = useState("")
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authInitialTab, setAuthInitialTab] = useState("login")
 
-  const { isAuthenticated, customer, logout } = useContext(loginContext)
-  const { carrinho } = useContext(carrinhoContext)
+  const { isAuthenticated, customer, logout } = useContext(LoginContext)
+  const { cart } = useContext(CartContext)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -31,18 +31,18 @@ export function Header({ book = [], setPesquisado }) {
   function handleSearch(event) {
     event.preventDefault()
 
-    const termo = digitado.trim()
+    const query = searchInput.trim()
 
-    if (!termo) return
+    if (!query) return
 
-    const resultadoPesquisa = book.filter((livro) =>
-      livro.titulo.toLowerCase().includes(termo.toLowerCase())
+    const searchResults = books.filter((book) =>
+      book.title.toLowerCase().includes(query.toLowerCase())
     )
 
-    setPesquisado(termo)
-    setDigitado("")
+    setSearchQuery(query)
+    setSearchInput("")
 
-    navigate("/pesquisa", { state: resultadoPesquisa })
+    navigate("/pesquisa", { state: searchResults })
   }
 
   return (
@@ -69,8 +69,8 @@ export function Header({ book = [], setPesquisado }) {
           >
             <input
               className="min-w-0 flex-1 rounded-l-xl bg-transparent px-3 py-2 text-sm text-black outline-none placeholder:text-slate-400 sm:px-4"
-              value={digitado}
-              onChange={(event) => setDigitado(event.target.value)}
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Buscar um livro..."
               aria-label="Buscar um livro"
             />
@@ -137,9 +137,9 @@ export function Header({ book = [], setPesquisado }) {
             >
               <ShoppingCart size={27} />
 
-              {carrinho.length > 0 && (
+              {cart.length > 0 && (
                 <span className="absolute -right-1 -top-1 rounded-full bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
-                  {carrinho.length}
+                  {cart.length}
                 </span>
               )}
             </Link>

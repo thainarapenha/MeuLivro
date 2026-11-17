@@ -1,6 +1,6 @@
 import bannerHero from "@/assets/jpg/banner-hero.jpg"
 
-export function Banner() {
+export const Hero = () => {
   return (
     <section className="relative bg-white">
       <div className="mx-auto flex w-full justify-center pb-6">
