@@ -3,34 +3,17 @@ import { useNavigate } from "react-router-dom"
 import { Minus, Plus } from "lucide-react"
 import { X } from "phosphor-react"
 import { CartContext } from "@/contexts/CartContext"
+import { formatBookPrice, getBookPricing } from "@/utils/bookPricing"
 
 export const CartItems = ({ cartItem }) => {
   const { item: book, quantity } = cartItem
   const { incrementQuantity, decrementQuantity, removeFromCart } = useContext(CartContext)
   const navigate = useNavigate()
 
-  const parsePrice = (value) => {
-    if (typeof value === "number") return value
-
-    const normalizedValue = String(value ?? "")
-      .replace(/[^\d,.-]/g, "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-
-    return Number(normalizedValue)
-  }
-
-  const price = parsePrice(book.price ?? book.preco)
-
-  const formattedPrice = price.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  })
-
-  const subtotal = (price * quantity).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  })
+  const pricing = getBookPricing(book)
+  const subtotal = pricing.price === null
+    ? null
+    : pricing.price * quantity
 
   const openDetails = () => navigate(`/detalhes/${book.id}`)
 
@@ -58,8 +41,18 @@ export const CartItems = ({ cartItem }) => {
       <div className="flex flex-col gap-1">
         <span className="text-xs text-slate-500 md:hidden">Preço</span>
         <strong className="text-sm text-slate-700">
-          {formattedPrice}
+          {formatBookPrice(pricing.price)}
         </strong>
+        {pricing.hasPromotion && (
+          <>
+            <span className="text-xs text-slate-400 line-through">
+              {formatBookPrice(pricing.originalPrice)}
+            </span>
+            <span className="text-xs font-bold text-emerald-700">
+              -{pricing.discountPercentage}%
+            </span>
+          </>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -92,7 +85,11 @@ export const CartItems = ({ cartItem }) => {
 
       <div className="flex flex-col gap-1">
         <span className="text-xs text-slate-500 md:hidden">Subtotal</span>
-        <strong className="text-sm text-slate-900">{subtotal}</strong>
+        <strong className="text-sm text-slate-900">
+          {subtotal === null
+            ? "Consulte o preço"
+            : formatBookPrice(subtotal)}
+        </strong>
       </div>
 
       <button

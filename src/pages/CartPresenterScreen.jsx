@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { CartItems } from "@/components/CartItems/CartItems"
 import { Loading } from "@/components/Loading/Loading"
@@ -9,6 +9,7 @@ import { LoginContext } from "@/contexts/LoginContext"
 
 import { createOrder } from "@/services/ordersApi"
 import { listBooks } from "@/services/booksApi"
+import { formatBookPrice, getBookPricing } from "@/utils/bookPricing"
 
 import { toast } from "react-toastify"
 
@@ -19,8 +20,12 @@ export const CartPresenterScreen = ({ onOpenAuth }) => {
     cartLoading,
     clearCart,
     removeUnavailableItem,
+    getCartSubtotal,
+    getCartDiscount,
     getCartTotal,
   } = useContext(CartContext)
+
+  const navigate = useNavigate()
 
   const { isAuthenticated, authLoading } = useContext(LoginContext)
   const [checkingOut, setCheckingOut] = useState(false)
@@ -235,7 +240,14 @@ export const CartPresenterScreen = ({ onOpenAuth }) => {
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Subtotal</span>
               <span className="font-medium text-slate-900">
-                {getCartTotal()}
+                {getCartSubtotal()}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-sm text-slate-600">
+              <span>Desconto aplicado</span>
+              <span className="font-semibold text-emerald-700">
+                - {getCartDiscount()}
               </span>
             </div>
 
@@ -292,7 +304,7 @@ export const CartPresenterScreen = ({ onOpenAuth }) => {
               )
               .slice(0, 5)
               .map((book) => {
-                const price = Number(book.price ?? book.preco)
+                const pricing = getBookPricing(book)
                 const image = book.imageUrl || book.image_url || ""
 
                 return (
@@ -323,13 +335,19 @@ export const CartPresenterScreen = ({ onOpenAuth }) => {
                       </span>
 
                       <span className="text-sm font-bold text-amber-700">
-                        {Number.isFinite(price)
-                          ? price.toLocaleString("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            })
-                          : "Consulte o preço"}
+                        {formatBookPrice(pricing.price)}
                       </span>
+
+                      {pricing.hasPromotion && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-400 line-through">
+                            {formatBookPrice(pricing.originalPrice)}
+                          </span>
+                          <span className="text-xs font-bold text-emerald-700">
+                            -{pricing.discountPercentage}%
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </Link>
                 )

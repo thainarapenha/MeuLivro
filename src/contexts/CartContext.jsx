@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react"
 import { toast } from "react-toastify"
+import { getBookPricing } from "@/utils/bookPricing"
 
 export const CartContext = createContext({})
 
@@ -150,10 +151,18 @@ export function CartProvider({
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(persistedItems))
   }, [cart, cartReady, unavailableItems])
 
-  function addToCart(book) {
+  function addToCart(book, quantity = 1) {
     const bookId = getBookId(book)
+    const requestedQuantity = Number(quantity)
 
-    if (!Number.isInteger(bookId) || bookId <= 0) return
+    if (
+      !Number.isInteger(bookId) ||
+      bookId <= 0 ||
+      !Number.isInteger(requestedQuantity) ||
+      requestedQuantity <= 0
+    ) {
+      return
+    }
 
     const stock = getBookStock(book)
 
@@ -162,17 +171,7 @@ export function CartProvider({
     )
 
     if (unavailableItem) {
-      setUnavailableItems((currentItems) =>
-        currentItems.map((currentItem) =>
-          currentItem.bookId === bookId
-            ? {
-                ...currentItem,
-                quantity: currentItem.quantity + 1,
-                item: book,
-              }
-            : currentItem
-        )
-      )
+      toast.error("Este livro está indisponível no momento.")
       return
     }
 
@@ -180,17 +179,15 @@ export function CartProvider({
       ({ item }) => getBookId(item) === bookId
     )
 
-    if (!existingItem && stock === 0) {
-      setUnavailableItems((items) => [
-        ...items,
-        createUnavailableItem(bookId, 1, book, "out_of_stock"),
-      ])
-      toast.error("Este livro está sem estoque.")
-      return
-    }
+    const currentQuantity = existingItem?.quantity || 0
+    const newQuantity = currentQuantity + requestedQuantity
 
-    if (existingItem && stock !== null && existingItem.quantity >= stock) {
-      toast.warning("Você atingiu o limite de estoque deste livro.")
+    if (stock === 0 || (stock !== null && newQuantity > stock)) {
+      toast.warning(
+        stock === 0
+          ? "Este livro está sem estoque."
+          : "Quantidade solicitada superior ao estoque disponível."
+      )
       return
     }
 
@@ -200,16 +197,18 @@ export function CartProvider({
       )
 
       if (!currentExistingItem) {
-        return [...currentItems, { item: book, quantity: 1 }]
-      }
-
-      if (stock !== null && currentExistingItem.quantity >= stock) {
-        return currentItems
+        return [
+          ...currentItems,
+          { item: book, quantity: requestedQuantity },
+        ]
       }
 
       return currentItems.map((currentItem) =>
         getBookId(currentItem.item) === bookId
-          ? { ...currentItem, quantity: currentItem.quantity + 1 }
+          ? {
+              ...currentItem,
+              quantity: currentItem.quantity + requestedQuantity,
+            }
           : currentItem
       )
     })
@@ -231,6 +230,41 @@ export function CartProvider({
     )
   }
 
+  function getCartSubtotal() {
+    const formatter = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+
+    const subtotal = cart.reduce((accumulator, cartItem) => {
+      const pricing = getBookPricing(cartItem.item)
+
+      return pricing.originalPrice === null
+        ? accumulator
+        : accumulator + cartItem.quantity * pricing.originalPrice
+    }, 0)
+
+    return formatter.format(subtotal)
+  }
+
+  function getCartDiscount() {
+    const formatter = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+
+    const discount = cart.reduce((accumulator, cartItem) => {
+      const pricing = getBookPricing(cartItem.item)
+
+      if (!pricing.hasPromotion) return accumulator
+
+      return accumulator +
+        cartItem.quantity * (pricing.originalPrice - pricing.price)
+    }, 0)
+
+    return formatter.format(discount)
+  }
+
   function getCartTotal() {
     const formatter = new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -238,14 +272,11 @@ export function CartProvider({
     })
 
     const total = cart.reduce((accumulator, cartItem) => {
-      const price = Number(
-        String(cartItem.item.price).replace(",", ".")
-      )
+      const pricing = getBookPricing(cartItem.item)
 
-      return (
-        accumulator +
-        cartItem.quantity * (Number.isFinite(price) ? price : 0)
-      )
+      return pricing.price === null
+        ? accumulator
+        : accumulator + cartItem.quantity * pricing.price
     }, 0)
 
     return formatter.format(total)
@@ -303,6 +334,8 @@ export function CartProvider({
     addToCart,
     removeFromCart,
     removeUnavailableItem,
+    getCartSubtotal,
+    getCartDiscount,
     getCartTotal,
     incrementQuantity,
     decrementQuantity,
