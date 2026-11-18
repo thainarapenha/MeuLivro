@@ -111,7 +111,14 @@ export const Header = ({ books = [], setSearchQuery, onOpenAuth }) => {
         <div className="flex items-center justify-self-end gap-2 sm:gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-1 text-black sm:gap-2">
-              <UserCircle size={30} />
+              <button
+                type="button"
+                onClick={logout}
+                aria-label="Sair da conta"
+                className="rounded-lg p-2 transition hover:bg-black/5"
+              >
+                <SignOut size={22} />
+              </button>
 
               <div className="hidden text-xs leading-tight sm:block">
                 <span className="block font-bold">
@@ -126,25 +133,15 @@ export const Header = ({ books = [], setSearchQuery, onOpenAuth }) => {
                   Sair
                 </button>
               </div>
-
-              <button
-                type="button"
-                onClick={logout}
-                aria-label="Sair da conta"
-                className="rounded-lg p-2 transition hover:bg-black/5"
-              >
-                <SignOut size={22} />
-              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-black">
-
               <button
-                  type="button"
-                  onClick={() => onOpenAuth("login")}
-                >
-                  <UserCircle size={30} />
-                </button>
+                type="button"
+                onClick={() => onOpenAuth("login")}
+              >
+                <UserCircle size={30} />
+              </button>
 
               <div className="hidden text-xs leading-tight sm:block">
                 <span className="block font-bold">Meu Livro</span>

@@ -23,7 +23,7 @@ const createInitialSections = () =>
     return sections
   }, {})
 
-export const HomePresenterScreen = ({ catalogLoading, catalogError }) => {
+export const HomePresenterScreen = ({ books = [], catalogLoading, catalogError }) => {
   const [sections, setSections] = useState(createInitialSections)
   const sectionsRequestStarted = useRef(false)
 
@@ -73,7 +73,7 @@ export const HomePresenterScreen = ({ catalogLoading, catalogError }) => {
 
   return (
     <>
-      <Hero />
+      <Hero books={books} />
       {sectionDefinitions.map((section) => {
         const sectionState = sections[section.key]
 

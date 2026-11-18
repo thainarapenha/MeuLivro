@@ -266,11 +266,13 @@ export const SearchPresenterScreen = ({ searchQuery }) => {
           Pesquisa
         </p>
 
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          {searchQuery === "Todos os livros"
-            ? "Todos os livros"
-            : `Resultados para "${searchQuery}"`}
-        </h1>
+        {searchQuery?.trim() && (
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+            {searchQuery === "Todos os livros"
+              ? "Todos os livros"
+              : `Resultados para "${searchQuery}"`}
+          </h1>
+        )}
 
         <p className="mt-2 text-sm text-slate-500">
           {filteredBooks.length} livro(s) encontrado(s)

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { CartItems } from "@/components/CartItems/CartItems"
 import { Loading } from "@/components/Loading/Loading"
@@ -24,6 +24,8 @@ export const CartPresenterScreen = ({ onOpenAuth }) => {
     getCartDiscount,
     getCartTotal,
   } = useContext(CartContext)
+
+  const navigate = useNavigate()
 
   const { isAuthenticated, authLoading } = useContext(LoginContext)
   const [checkingOut, setCheckingOut] = useState(false)
