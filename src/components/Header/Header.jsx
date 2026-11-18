@@ -68,7 +68,7 @@ export const Header = ({ books = [], setSearchQuery }) => {
             className="mx-auto flex w-full max-w-[580px] min-w-0 rounded-xl bg-white shadow-inner"
           >
             <input
-              className="min-w-0 flex-1 rounded-l-xl bg-transparent px-3 py-2 text-sm text-black outline-none placeholder:text-slate-400 sm:px-4"
+              className="min-w-0 flex-1 rounded-l-xl bg-gray-100 px-3 py-2 text-sm text-black outline-none placeholder:text-slate-400 sm:px-4"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Buscar um livro..."
@@ -78,7 +78,7 @@ export const Header = ({ books = [], setSearchQuery }) => {
             <button
               type="submit"
               aria-label="Buscar"
-              className="rounded-r-xl px-3 text-slate-700 transition hover:bg-slate-100 sm:px-4"
+              className="rounded-r-xl px-3 bg-gray-100 text-slate-700 transition hover:bg-slate-100 sm:px-4"
             >
               <MagnifyingGlass size={20} />
             </button>
