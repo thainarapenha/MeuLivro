@@ -6,6 +6,8 @@ import "@/global.css"
 import "react-toastify/dist/ReactToastify.css"
 
 import { Header } from "@/components/Header/Header.jsx"
+import { AuthModal } from "@/components/AuthModal/AuthModal.jsx"
+
 import { LoginProvider } from "@/contexts/LoginContext"
 import { CartProvider } from "@/contexts/CartContext"
 
@@ -22,6 +24,8 @@ export function App() {
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [catalogError, setCatalogError] = useState(false)
   const catalogRequestStarted = useRef(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authInitialTab, setAuthInitialTab] = useState("login")
 
   useEffect(() => {
     if (catalogRequestStarted.current) return
@@ -37,6 +41,11 @@ export function App() {
       .finally(() => setCatalogLoading(false))
   }, [])
 
+  const openAuthModal = (tab = "login") => {
+    setAuthInitialTab(tab)
+    setAuthModalOpen(true)
+  }
+
   return (
     <BrowserRouter>
       <LoginProvider>
@@ -45,7 +54,11 @@ export function App() {
           catalogLoading={catalogLoading}
           catalogError={catalogError}
         >
-          <Header books={books} setSearchQuery={setSearchQuery} />
+          <Header
+            books={books}
+            setSearchQuery={setSearchQuery}
+            onOpenAuth={openAuthModal}
+          />
 
           <Routes>
             <Route
@@ -58,7 +71,10 @@ export function App() {
                 />
               }
             />
-            <Route path="/carrinho" element={<CartPresenterScreen />} />
+            <Route
+              path="/carrinho"
+              element={<CartPresenterScreen onOpenAuth={openAuthModal} />}
+            />
             <Route
               path="/detalhes/:id"
               element={<ProductDetailsPresenterScreen />}
@@ -68,10 +84,16 @@ export function App() {
               element={<SearchPresenterScreen searchQuery={searchQuery} />}
             />
           </Routes>
+
+          <AuthModal
+            open={authModalOpen}
+            onOpenChange={setAuthModalOpen}
+            initialTab={authInitialTab}
+          />
         </CartProvider>
 
         <ToastContainer
-          position="top-center"
+          position="top-right"
           autoClose={3000}
           theme="light"
           closeOnClick

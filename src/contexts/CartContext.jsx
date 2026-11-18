@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react"
+import { toast } from "react-toastify"
 
 export const CartContext = createContext({})
 
@@ -184,6 +185,12 @@ export function CartProvider({
         ...items,
         createUnavailableItem(bookId, 1, book, "out_of_stock"),
       ])
+      toast.error("Este livro está sem estoque.")
+      return
+    }
+
+    if (existingItem && stock !== null && existingItem.quantity >= stock) {
+      toast.warning("Você atingiu o limite de estoque deste livro.")
       return
     }
 
@@ -206,6 +213,8 @@ export function CartProvider({
           : currentItem
       )
     })
+
+    toast.success("Livro adicionado ao carrinho!")
   }
 
   function removeFromCart(bookId) {

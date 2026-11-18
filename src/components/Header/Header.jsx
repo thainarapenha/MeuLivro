@@ -8,12 +8,9 @@ import {
 } from "phosphor-react"
 import { LoginContext } from "@/contexts/LoginContext"
 import { CartContext } from "@/contexts/CartContext"
-import { AuthModal } from "@/components/AuthModal/AuthModal.jsx"
 
-export const Header = ({ books = [], setSearchQuery }) => {
+export const Header = ({ books = [], setSearchQuery, onOpenAuth }) => {
   const [searchInput, setSearchInput] = useState("")
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authInitialTab, setAuthInitialTab] = useState("login")
 
   const { isAuthenticated, customer, logout } = useContext(LoginContext)
   const { cart } = useContext(CartContext)
@@ -23,12 +20,7 @@ export const Header = ({ books = [], setSearchQuery }) => {
 
   const isHome = location.pathname === "/"
 
-  function openAuthModal(tab) {
-    setAuthInitialTab(tab)
-    setAuthModalOpen(true)
-  }
-
-  function handleSearch(event) {
+  const handleSearch = (event) => {
     event.preventDefault()
 
     const query = searchInput.trim()
@@ -122,7 +114,7 @@ export const Header = ({ books = [], setSearchQuery }) => {
 
                   <button
                     type="button"
-                    onClick={() => openAuthModal("login")}
+                    onClick={() => onOpenAuth("login")}
                   >
                     Entre ou Cadastre-se
                   </button>
@@ -146,12 +138,6 @@ export const Header = ({ books = [], setSearchQuery }) => {
           </div>
         </div>
       </header>
-
-      <AuthModal
-        open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
-        initialTab={authInitialTab}
-      />
     </>
   )
 }
