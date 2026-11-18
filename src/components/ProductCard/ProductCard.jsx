@@ -19,13 +19,9 @@ export const ProductCard = ({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-4 lg:px-8 lg:py-14">
       <div className="mb-8 flex items-end justify-between">
         <div>
-          <p className="font-bold uppercase tracking-widest text-brand">
-            Nosso acervo
-          </p>
-
           <h2 className="mt-2 text-3xl font-black text-ink">
             {title}
           </h2>

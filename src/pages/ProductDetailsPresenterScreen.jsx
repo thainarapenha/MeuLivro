@@ -1,20 +1,25 @@
 import { useState, useEffect, useContext } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { Minus, Plus } from "lucide-react"
 
-import { getBookById } from "@/services/booksApi"
-import { CartContext } from "@/contexts/CartContext"
 import { Loading } from "@/components/Loading/Loading"
+
+import { getBookById, listBooks } from "@/services/booksApi"
+
+import { CartContext } from "@/contexts/CartContext"
+
 import { formatBookPrice, getBookPricing } from "@/utils/bookPricing"
 
 export const ProductDetailsPresenterScreen = () => {
+  const { id } = useParams()
+  const { addToCart, cart } = useContext(CartContext)
+  const navigate = useNavigate()
+
   const [book, setBook] = useState(null)
   const [error, setError] = useState(false)
   const [quantity, setQuantity] = useState(1)
-  const { id } = useParams()
-  const { addToCart } = useContext(CartContext)
-  const navigate = useNavigate()
-
+  const [recommendations, setRecommendations] = useState([])
+  
   useEffect(() => {
     window.scrollTo({ top: 0 })
 
@@ -26,6 +31,26 @@ export const ProductDetailsPresenterScreen = () => {
       .then(setBook)
       .catch(() => setError(true))
   }, [id])
+
+  useEffect(() => {
+    let active = true
+
+    listBooks()
+      .then((books) => {
+        if (active) {
+          setRecommendations(books)
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setRecommendations([])
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   if (error) {
     return (
@@ -68,10 +93,7 @@ export const ProductDetailsPresenterScreen = () => {
   }
 
   const handleAddToCart = () => {
-    for (let index = 0; index < quantity; index++) {
-      addToCart(book)
-    }
-
+    addToCart(book, quantity)
     navigate("/carrinho")
   }
 
@@ -83,7 +105,7 @@ export const ProductDetailsPresenterScreen = () => {
         <section className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-[64px_minmax(0,1fr)] md:gap-4">
 
           {/* Miniaturas */}
-          <div className="order-2 flex gap-3 overflow-x-auto md:order-1 md:flex-col md:overflow-visible">
+          <div className="hidden md:order-1 md:flex md:flex-col md:gap-3 md:overflow-visible">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
@@ -156,6 +178,19 @@ export const ProductDetailsPresenterScreen = () => {
             </div>
           )}
 
+          {/* Descrição */}
+          {description && (
+            <div className="mt-6 border-t border-slate-200 pt-5">
+              <h2 className="text-sm font-bold text-slate-900">
+                Sobre este livro
+              </h2>
+
+              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+                {description}
+              </p>
+            </div>
+          )}
+
           {categories.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {categories.map((category) => {
@@ -171,19 +206,6 @@ export const ProductDetailsPresenterScreen = () => {
                   </span>
                 ) : null
               })}
-            </div>
-          )}
-
-          {/* Descrição */}
-          {description && (
-            <div className="mt-6 border-t border-slate-200 pt-5">
-              <h2 className="text-sm font-bold text-slate-900">
-                Sobre este livro
-              </h2>
-
-              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-                {description}
-              </p>
             </div>
           )}
 
@@ -248,8 +270,87 @@ export const ProductDetailsPresenterScreen = () => {
             </button>
           </div>
         </section>
-
       </div>
+
+      {recommendations.filter(
+        (recommendedBook) =>
+          Number(recommendedBook.id) !== Number(book.id) &&
+          !cart.some(
+            (cartItem) =>
+              Number(cartItem.item.id) === Number(recommendedBook.id)
+          )
+      ).length > 0 && (
+        <section className="mt-12 flex flex-col gap-5">
+          <div className="flex items-center justify-between border-b border-amber-200 pb-3">
+            <h2 className="text-lg font-bold text-slate-900">
+              Você também pode gostar
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {recommendations
+              .filter(
+                (recommendedBook) =>
+                  Number(recommendedBook.id) !== Number(book.id) &&
+                  !cart.some(
+                    (cartItem) =>
+                      Number(cartItem.item.id) === Number(recommendedBook.id)
+                  )
+              )
+              .slice(0, 5)
+              .map((recommendedBook) => {
+                const recommendedPricing = getBookPricing(recommendedBook)
+                const recommendedImage =
+                  recommendedBook.imageUrl || recommendedBook.image_url || ""
+
+                return (
+                  <Link
+                    key={recommendedBook.id}
+                    to={`/detalhes/${recommendedBook.id}`}
+                    className="group min-w-0"
+                  >
+                    <div className="overflow-hidden rounded-xl bg-white p-2 shadow-sm transition group-hover:shadow-md">
+                      <div className="flex aspect-[4/5] items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+                        {recommendedImage ? (
+                          <img
+                            src={recommendedImage}
+                            alt={recommendedBook.title}
+                            className="h-full w-full object-contain transition duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <span className="text-xs text-slate-400">
+                            Imagem indisponível
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-col gap-1 px-1">
+                      <span className="line-clamp-2 text-sm font-semibold text-slate-800 transition group-hover:text-amber-700">
+                        {recommendedBook.title}
+                      </span>
+
+                      <span className="text-sm font-bold text-amber-700">
+                        {formatBookPrice(recommendedPricing.price)}
+                      </span>
+
+                      {recommendedPricing.hasPromotion && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-400 line-through">
+                            {formatBookPrice(recommendedPricing.originalPrice)}
+                          </span>
+                          <span className="text-xs font-bold text-emerald-700">
+                            -{recommendedPricing.discountPercentage}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+          </div>
+        </section>
+      )}
     </main>
   )
 }

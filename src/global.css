@@ -36,3 +36,14 @@
     @apply rounded-xl bg-brand px-5 py-3 font-bold text-ink transition hover:-translate-y-0.5 hover:bg-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-200 disabled:cursor-not-allowed disabled:opacity-50;
   }
 }
+
+@media (max-width: 640px) {
+  .Toastify__toast-container--top-right,
+  .Toastify__toast-container--top-center,
+  .Toastify__toast-container--top-left {
+    top: 40px !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+  }
+}

@@ -7,7 +7,7 @@ export const Hero = () => {
         <img
           src={bannerHero}
           alt="Banner principal da livraria"
-          className="h-auto max-h-[620px] w-full object-cover object-center"
+          className="h-[60dvh] max-h-[620px] w-full object-cover object-center md:h-auto"
         />
       </div>
     </section>

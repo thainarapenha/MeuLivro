@@ -94,6 +94,7 @@ export function App() {
 
         <ToastContainer
           position="top-right"
+          toastClassName="mobile-toast"
           autoClose={3000}
           theme="light"
           closeOnClick
