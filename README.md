@@ -2,14 +2,9 @@
 
 <img width="4661" height="2133" alt="banner-meulivro" src="https://github.com/user-attachments/assets/eb079afb-d194-458a-aef9-1edad7f8ddad" />
 
-<br />
 O Meu Livro é um E-Commerce de livraria online, onde usuários podem explorar livros, pesquisar títulos, consultar detalhes, visualizar promoções e lançamentos, gerenciar o carrinho e realizar compras simuladas.
 
-<br />
-
 O projeto surgiu como trabalho final de módulo do curso de formação em Desenvolvimento Web Full Stack da Resilia Educação, em 2022. Em 2026, foi reformulado, com melhorias na interface, funcionalidades e estrutura da aplicação.
-
-<br />
 
 **Repositório Back-End:** [Livraria API](https://github.com/thainarapenha/LivrariaAPI)
 
