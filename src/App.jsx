@@ -1,80 +1,106 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { ToastContainer } from "react-toastify"
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "@/global.css"
+import "react-toastify/dist/ReactToastify.css"
 
-import "./global.css";
+import { Header } from "@/components/Header/Header.jsx"
+import { AuthModal } from "@/components/AuthModal/AuthModal.jsx"
 
-import { Home } from "./pages/Home/Home.jsx";
-import { Cadastro } from "./pages/cadastro/Cadastro";
-import { Login } from "./pages/Login/Login";
-import { Header } from "./components/Header/index";
-import { Footer } from "./components/footer/footer";
-import { LoginProvider } from "./contexts/loginContext";
-import { Carrinho } from "./pages/carrinho/Carrinho";
-import { CarrinhoProvider } from "./contexts/carrinhoContext";
+import { LoginProvider } from "@/contexts/LoginContext"
+import { CartProvider } from "@/contexts/CartContext"
 
-import { ToastContainer } from "react-toastify";
-import { DetalhesProduto } from "./pages/detalhesProduto/DetalhesProduto";
-import { Pesquisa } from "./pages/pesquisa/Pesquisa";
-import { listarLivros } from "./services/livrosApi";
+import { listBooks } from "@/services/booksApi"
+
+import { HomePresenterScreen } from "@/pages/HomePresenterScreen"
+import { CartPresenterScreen } from "@/pages/CartPresenterScreen"
+import { ProductDetailsPresenterScreen } from "@/pages/ProductDetailsPresenterScreen"
+import { SearchPresenterScreen } from "@/pages/SearchPresenterScreen"
 
 export function App() {
-  const [book, setBook] = useState([]);
-  const [pesquisado, setPesquisado] = useState("");
-  const [catalogoCarregando, setCatalogoCarregando] = useState(true);
-  const [catalogoErro, setCatalogoErro] = useState(false);
-  const catalogoSolicitado = useRef(false);
+  const [books, setBooks] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [catalogLoading, setCatalogLoading] = useState(true)
+  const [catalogError, setCatalogError] = useState(false)
+  const catalogRequestStarted = useRef(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authInitialTab, setAuthInitialTab] = useState("login")
 
   useEffect(() => {
-    if (catalogoSolicitado.current) return;
+    if (catalogRequestStarted.current) return
 
-    catalogoSolicitado.current = true;
+    catalogRequestStarted.current = true
 
-    listarLivros()
-      .then((livros) => setBook(livros))
-      .catch((erro) => {
-        console.error("Não foi possível carregar o catálogo", erro);
-        setCatalogoErro(true);
+    listBooks()
+      .then((loadedBooks) => setBooks(loadedBooks))
+      .catch((error) => {
+        console.error("Não foi possível carregar o catálogo", error)
+        setCatalogError(true)
       })
-      .finally(() => setCatalogoCarregando(false));
-  }, []);
+      .finally(() => setCatalogLoading(false))
+  }, [])
+
+  const openAuthModal = (tab = "login") => {
+    setAuthInitialTab(tab)
+    setAuthModalOpen(true)
+  }
 
   return (
-    <div>
-      <BrowserRouter>
-        <LoginProvider>
-          <CarrinhoProvider
-            book={book}
-            catalogLoading={catalogoCarregando}
-            catalogError={catalogoErro}
-          >
-            <Header book={book} setPesquisado={setPesquisado} />
+    <BrowserRouter>
+      <LoginProvider>
+        <CartProvider
+          catalog={books}
+          catalogLoading={catalogLoading}
+          catalogError={catalogError}
+        >
+          <Header
+            books={books}
+            setSearchQuery={setSearchQuery}
+            onOpenAuth={openAuthModal}
+          />
 
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <Home
-                    book={book}
-                    catalogoCarregando={catalogoCarregando}
-                    catalogoErro={catalogoErro}
-                  />
-                }
-              />
-              <Route path="/cadastro" element={<Cadastro />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/carrinho" element={<Carrinho />} />
-              <Route path="/detalhes/:id" element={<DetalhesProduto />} />
-              <Route
-                path="/pesquisa"
-                element={<Pesquisa pesquisado={pesquisado} />}
-              />
-            </Routes>
-            <Footer />
-            <ToastContainer />
-          </CarrinhoProvider>
-        </LoginProvider>
-      </BrowserRouter>
-    </div>
-  );
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <HomePresenterScreen
+                  books={books}
+                  catalogLoading={catalogLoading}
+                  catalogError={catalogError}
+                />
+              }
+            />
+            <Route
+              path="/carrinho"
+              element={<CartPresenterScreen onOpenAuth={openAuthModal} />}
+            />
+            <Route
+              path="/detalhes/:id"
+              element={<ProductDetailsPresenterScreen />}
+            />
+            <Route
+              path="/pesquisa"
+              element={<SearchPresenterScreen searchQuery={searchQuery} />}
+            />
+          </Routes>
+
+          <AuthModal
+            open={authModalOpen}
+            onOpenChange={setAuthModalOpen}
+            initialTab={authInitialTab}
+          />
+        </CartProvider>
+
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          theme="light"
+          closeOnClick
+          pauseOnHover
+          draggable
+        />
+      </LoginProvider>
+    </BrowserRouter>
+  )
 }
