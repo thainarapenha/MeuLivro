@@ -5,6 +5,7 @@ import { Minus, Plus } from "lucide-react"
 import { getBookById } from "@/services/booksApi"
 import { CartContext } from "@/contexts/CartContext"
 import { Loading } from "@/components/Loading/Loading"
+import { formatBookPrice, getBookPricing } from "@/utils/bookPricing"
 
 export const ProductDetailsPresenterScreen = () => {
   const [book, setBook] = useState(null)
@@ -46,13 +47,15 @@ export const ProductDetailsPresenterScreen = () => {
   const description = book.description || book.descricao || ""
   const imageUrl =
     book.imageUrl || book.image_url || book.url_img || ""
-  const price = book.price ?? book.preco
+  const pricing = getBookPricing(book)
   const stock = Number(book.stockQuantity ?? book.stock_quantity ?? 99)
-
-  const formattedPrice =
-    price !== null && price !== undefined && price !== ""
-      ? String(price).replace(".", ",")
-      : "Consulte o preço"
+  const categories = Array.isArray(book.categories) ? book.categories : []
+  const releaseDate = book.releaseDate || book.release_date
+  const parsedReleaseDate = releaseDate ? new Date(releaseDate) : null
+  const formattedReleaseDate =
+    parsedReleaseDate && !Number.isNaN(parsedReleaseDate.getTime())
+      ? parsedReleaseDate.toLocaleDateString("pt-BR")
+      : ""
 
   const increaseQuantity = () => {
     setQuantity((current) =>
@@ -131,6 +134,46 @@ export const ProductDetailsPresenterScreen = () => {
             </p>
           )}
 
+          {(book.isPreorder || book.isNewRelease || formattedReleaseDate) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {book.isPreorder && (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                  Pré-venda
+                </span>
+              )}
+
+              {book.isNewRelease && (
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                  Lançamento
+                </span>
+              )}
+
+              {formattedReleaseDate && (
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                  Lançamento em {formattedReleaseDate}
+                </span>
+              )}
+            </div>
+          )}
+
+          {categories.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {categories.map((category) => {
+                const categoryName =
+                  typeof category === "string" ? category : category.name
+
+                return categoryName ? (
+                  <span
+                    key={category.id || categoryName}
+                    className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
+                  >
+                    {categoryName}
+                  </span>
+                ) : null
+              })}
+            </div>
+          )}
+
           {/* Descrição */}
           {description && (
             <div className="mt-6 border-t border-slate-200 pt-5">
@@ -145,11 +188,22 @@ export const ProductDetailsPresenterScreen = () => {
           )}
 
           {/* Preço */}
-          <p className="mt-5 text-xl font-black text-slate-900">
-            {price !== null && price !== undefined && price !== ""
-              ? `R$ ${formattedPrice}`
-              : formattedPrice}
-          </p>
+          <div className="mt-5 flex flex-wrap items-baseline gap-3">
+            <p className="text-xl font-black text-slate-900">
+              {formatBookPrice(pricing.price)}
+            </p>
+
+            {pricing.hasPromotion && (
+              <>
+                <span className="text-sm text-slate-400 line-through">
+                  {formatBookPrice(pricing.originalPrice)}
+                </span>
+                <span className="text-xs font-bold text-emerald-700">
+                  -{pricing.discountPercentage}%
+                </span>
+              </>
+            )}
+          </div>
 
           {/* Quantidade e botão Comprar */}
           <div className="mt-7 flex flex-wrap items-center justify-between gap-5">

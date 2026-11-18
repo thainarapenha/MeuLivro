@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react"
 import { toast } from "react-toastify"
+import { getBookPricing } from "@/utils/bookPricing"
 
 export const CartContext = createContext({})
 
@@ -231,6 +232,41 @@ export function CartProvider({
     )
   }
 
+  function getCartSubtotal() {
+    const formatter = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+
+    const subtotal = cart.reduce((accumulator, cartItem) => {
+      const pricing = getBookPricing(cartItem.item)
+
+      return pricing.originalPrice === null
+        ? accumulator
+        : accumulator + cartItem.quantity * pricing.originalPrice
+    }, 0)
+
+    return formatter.format(subtotal)
+  }
+
+  function getCartDiscount() {
+    const formatter = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+
+    const discount = cart.reduce((accumulator, cartItem) => {
+      const pricing = getBookPricing(cartItem.item)
+
+      if (!pricing.hasPromotion) return accumulator
+
+      return accumulator +
+        cartItem.quantity * (pricing.originalPrice - pricing.price)
+    }, 0)
+
+    return formatter.format(discount)
+  }
+
   function getCartTotal() {
     const formatter = new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -238,14 +274,11 @@ export function CartProvider({
     })
 
     const total = cart.reduce((accumulator, cartItem) => {
-      const price = Number(
-        String(cartItem.item.price).replace(",", ".")
-      )
+      const pricing = getBookPricing(cartItem.item)
 
-      return (
-        accumulator +
-        cartItem.quantity * (Number.isFinite(price) ? price : 0)
-      )
+      return pricing.price === null
+        ? accumulator
+        : accumulator + cartItem.quantity * pricing.price
     }, 0)
 
     return formatter.format(total)
@@ -303,6 +336,8 @@ export function CartProvider({
     addToCart,
     removeFromCart,
     removeUnavailableItem,
+    getCartSubtotal,
+    getCartDiscount,
     getCartTotal,
     incrementQuantity,
     decrementQuantity,
