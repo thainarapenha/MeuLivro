@@ -6,7 +6,7 @@ O Meu Livro é um E-Commerce de livraria online, onde usuários podem explorar l
 
 O projeto surgiu como trabalho final de módulo do curso de formação em Desenvolvimento Web Full Stack da Resilia Educação, em 2022. Em 2026, foi reformulado, com melhorias na interface, funcionalidades e estrutura da aplicação.
 
-**Repositório Back-End:** [Livraria API](https://github.com/thainarapenha/LivrariaAPI)
+**Repositório Back-End:** [Meu Livro API](https://github.com/thainarapenha/MeuLivroAPI/)
 
 <br />
 <div align="center">React | JavaScript | Taiwind | Vite</div>
@@ -31,8 +31,8 @@ O projeto surgiu como trabalho final de módulo do curso de formação em Desenv
 
 ##  O que falta:
 - [ ] Tela de Recuperação de senha
-- [ ] Telas de ADM (CRUD de livros)
 - [ ] Ajuste de performance
+- [ ] Code Review ao final de novas implementações
 
 ##  Instalando e Executando
 
