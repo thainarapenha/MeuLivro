@@ -2,7 +2,7 @@ import axios from "axios"
 import { clearAuthSession, getAuthToken } from "@/services/authStorage"
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: import.meta.env.API_MEU_LIVRO || "http://localhost:3000",
 })
 
 api.interceptors.request.use((config) => {
